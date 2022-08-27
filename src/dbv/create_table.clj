@@ -4,7 +4,6 @@
             [dbv.db-type :as db-type]
             ))
 
-
 (defn create-table
   [{:keys [table]}]
   (let [columns (sort
@@ -17,21 +16,25 @@
                 (fn [n]
                   (map
                    (fn [[column-name column-type]]
-                     [(str column-name n)
-                      column-type])
+                     [(keyword (str column-name "_" n))
+                      (keyword column-type)])
                    columns))
                 (range 0 8))]
-    (-> table
+    (-> (or table
+            :dbv)
         (h/create-table)
         (h/with-columns
           (concat
-           [["e" "uuid"]
-            ["a" "uuid"]]
-           columns
-           tuples
-           [["t" "bigint"]
-            ["r" "bigint"]
-            ]))))
+           [[:e :uuid]
+            [:a :uuid]
+            [:t :bigint]
+            [:r :bigint]
+            [:p :uuid]]
+           (map (fn [[k v]]
+                  [(keyword k)
+                   (keyword v)])
+                columns)
+           tuples))))
   )
 
 
